@@ -1,6 +1,31 @@
 defmodule ToadieBot.Commands do
   alias ToadieBot.Http
 
+def salvar_feriado(data, nome_feriado) do
+  arquivo = "feriados.json"
+
+  novo_feriado = %{
+    data: data,
+    feriado: nome_feriado
+  }
+
+  conteudo =
+    case File.read(arquivo) do
+      {:ok, texto} ->
+        Jason.decode!(texto)
+
+      _ ->
+        []
+    end
+
+  novo_conteudo = conteudo ++ [novo_feriado]
+
+  json =
+    Jason.encode!(novo_conteudo, pretty: true)
+
+  File.write!(arquivo, json)
+end
+
   def livro(nome) do
     url =
       "https://openlibrary.org/search.json?q=" <>
@@ -47,30 +72,48 @@ defmodule ToadieBot.Commands do
     end
   end
 
-  def radio(pais) do
-    url =
-      "https://de1.api.radio-browser.info/json/stations/bycountry/" <>
-        URI.encode(pais)
+def moeda(origem, destino) do
+  url =
+    "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/" <>
+      String.downcase(origem) <>
+      ".json"
 
-    case Http.get(url) do
-      {:ok, body} ->
-        radio =
-          body
-          |> List.first()
+  case Http.get(url) do
+    {:ok, body} ->
+      taxas = body[String.downcase(origem)]
 
-        if radio do
-          nome = radio["name"]
-          idioma = radio["language"]
+      valor =
+        taxas[String.downcase(destino)]
 
-          "Rádio: #{nome}\nIdioma: #{idioma}"
-        else
-          "Nenhuma rádio encontrada :("
-        end
+      if valor do
+        "1 #{String.upcase(origem)} = #{valor} #{String.upcase(destino)}"
+      else
+        "Moeda não encontrada :("
+      end
 
-      _ ->
-        "Não foi possível encontrar uma rádio :("
-    end
+    _ ->
+      "Não foi possível converter moedas :("
   end
+end
+
+def frase do
+  url = "https://zenquotes.io/api/random"
+
+  case Http.get(url) do
+    {:ok, body} ->
+      frase =
+        body
+        |> List.first()
+
+      texto = frase["q"]
+      autor = frase["a"]
+
+      "\"#{texto}\"\n- #{autor}"
+
+    _ ->
+      "Não foi possível encontrar uma frase :("
+  end
+end
 
 def feriado(data) do
   [dia, mes, ano] = String.split(data, "/")
@@ -89,6 +132,8 @@ def feriado(data) do
 
       if feriado do
         nome = feriado["localName"]
+
+        salvar_feriado(data, nome)
 
         "Esse foi o feriado encontrado: #{nome}!"
       else
@@ -125,40 +170,6 @@ def florida(data) do
       "Não foi possível encontrar um artigo sobre um Florida Man :("
   end
 end
-
-  def museu(obra) do
-    busca_url =
-      "https://collectionapi.metmuseum.org/public/collection/v1/search?q=" <>
-        URI.encode(obra)
-
-    case Http.get(busca_url) do
-      {:ok, body} ->
-        id =
-          body["objectIDs"]
-          |> List.first()
-
-        if id do
-          detalhe_url =
-            "https://collectionapi.metmuseum.org/public/collection/v1/objects/#{id}"
-
-          case Http.get(detalhe_url) do
-            {:ok, detalhe} ->
-              titulo = detalhe["title"]
-              artista = detalhe["artistDisplayName"]
-
-              "Obra: #{titulo}\nArtista: #{artista}"
-
-            _ ->
-              "Não foi possível encontrar detalhes da obra :("
-          end
-        else
-          "Nenhuma obra encontrada :("
-        end
-
-      _ ->
-        "Não foi possível encontrar a obra :("
-    end
-  end
 
   def curiosidade(data) do
     feriado_info = feriado(data)

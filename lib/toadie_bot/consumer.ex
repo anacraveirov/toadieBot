@@ -1,48 +1,56 @@
 defmodule ToadieBot.Consumer do
   use Nostrum.Consumer
 
-  alias Nostrum.Api
+  alias Nostrum.Api.Message
   alias ToadieBot.Commands
 
   def handle_event({:MESSAGE_CREATE, msg, _ws_state}) do
-    content = String.trim(msg.content)
+    content =
+      msg.content
+      |> to_string()
+      |> String.trim()
 
-    cond do
-      String.starts_with?(content, "!livro") ->
-        nome = get_args(content)
-        Api.create_message(msg.channel_id, Commands.livro(nome))
-
-      String.starts_with?(content, "!qualquercarta") ->
-        Api.create_message(msg.channel_id, Commands.cartas())
-
-      String.starts_with?(content, "!radio") ->
-        pais = get_args(content)
-        Api.create_message(msg.channel_id, Commands.radio(pais))
-
-      String.starts_with?(content, "!feriadonaflorida") ->
-        data = get_args(content)
-        Api.create_message(msg.channel_id, Commands.curiosidade(data))
-
-      String.starts_with?(content, "!feriado") ->
-        data = get_args(content)
-        Api.create_message(msg.channel_id, Commands.feriado(data))
-
-      String.starts_with?(content, "!floridaman") ->
-        data = get_args(content)
-        Api.create_message(msg.channel_id, Commands.florida(data))
-
-      String.starts_with?(content, "!museu") ->
-        obra = get_args(content)
-        Api.create_message(msg.channel_id, Commands.museu(obra))
-
-      true ->
-        :ignore
-    end
+    handle_command(content, msg.channel_id)
   end
 
-  defp get_args(content) do
-    content
-    |> String.split(" ", parts: 2)
-    |> Enum.at(1, "")
+  defp handle_command("!qualquercarta", channel_id) do
+    Message.create(channel_id, Commands.cartas())
+  end
+
+  defp handle_command("!livro " <> nome, channel_id) do
+    Message.create(channel_id, Commands.livro(nome))
+  end
+
+  defp handle_command("!moeda " <> moeda_args, channel_id) do
+    partes =
+      String.split(moeda_args, " ", parts: 2)
+
+    origem = Enum.at(partes, 0, "")
+    destino = Enum.at(partes, 1, "")
+
+    Message.create(
+      channel_id,
+      Commands.moeda(origem, destino)
+    )
+  end
+
+  defp handle_command("!feriadonaflorida " <> data, channel_id) do
+    Message.create(channel_id, Commands.curiosidade(data))
+  end
+
+  defp handle_command("!feriado " <> data, channel_id) do
+    Message.create(channel_id, Commands.feriado(data))
+  end
+
+  defp handle_command("!floridaman " <> data, channel_id) do
+    Message.create(channel_id, Commands.florida(data))
+  end
+
+  defp handle_command("!frase", channel_id) do
+    Message.create(channel_id, Commands.frase())
+  end
+
+  defp handle_command(_, _) do
+    :ignore
   end
 end
