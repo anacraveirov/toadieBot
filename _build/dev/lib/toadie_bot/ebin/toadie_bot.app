@@ -1,1 +1,0 @@
-{application,toadie_bot,[{modules,['Elixir.ToadieBot.Application','Elixir.ToadieBot.Commands','Elixir.ToadieBot.Consumer','Elixir.ToadieBot.Http']},{optional_applications,[]},{applications,[kernel,stdlib,elixir,logger,nostrum,httpoison,jason]},{description,"toadie_bot"},{registered,[]},{vsn,"0.1.0"},{mod,{'Elixir.ToadieBot.Application',[]}}]}.
