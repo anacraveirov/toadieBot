@@ -1,6 +1,6 @@
 # ToadieBot * . ﹢ ˖ ✦
 
-Bot para Discord desenvolvido em Elixir utilizando Nostrum.
+Bot para Discord desenvolvido em Elixir para a disciplida de Proramação Funcional.
 
 ## APIs utilizadas
 
