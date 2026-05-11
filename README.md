@@ -13,9 +13,9 @@ Bot para Discord desenvolvido em Elixir para a disciplida de Proramação Funcio
 
 ## Comandos
 
-- !livro <nome do livro> <nome do autor>
+- !livro < nome do livro > < nome do autor >
 - !qualquercarta
-- !moeda <moeda1> <moeda2>
+- !moeda < moeda1 > < moeda2 >
 - !feriado <dia/mes/ano>
 - !floridaman <dia/mes/ano>
 - !frase
